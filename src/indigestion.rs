@@ -17,8 +17,6 @@ fn setup_proxy(opts: getopts::Matches) -> ProxyConfig {
     let config = ProxyConfig::new(("localhost".to_string(), 3000),
                                   ("localhost".to_string(), from_str::<u16>(opts.opt_str("l").unwrap().as_slice()).unwrap()));
 
-    opts.
-
     println!("{}", config);
 
     config
@@ -53,5 +51,7 @@ fn main() {
 
     let config = setup_proxy(matches);
 
-    let proxy = config.connect();
+    let mut proxy = config.connect();
+
+    proxy.run();
 }

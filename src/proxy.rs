@@ -1,4 +1,6 @@
+use std::sync::Arc;
 use std::io::TcpStream;
+use std::comm::channel;
 
 type Endpoint = (String, u16);
 
@@ -18,20 +20,22 @@ pub struct Proxy {
 }
 
 impl Proxy {
-    pub fn run(&self) {
-        fn run(from: TcpStream, to: TcpStream, taps: Vec<TcpStream>) -> ! {
+
+    pub fn run(&mut self) {
+        fn run<R: Reader, W:Writer>(from: &mut R, to: &mut W, mut taps: &Vec<W>) -> ! {
             loop {
                 let mut buf = [0];
                 from.read(buf);
-                for tap in taps.iter() {
-                    tap.write(buf)
-                }
+                // for mut tap in taps.iter() {
+                //     (tap).write(buf).ok();
+                // }
                 to.write(buf).ok();
             }
         }
 
-        spawn(proc() { run(self.osock, self.isock, self.opeeks); });
-        spawn(proc() { run(self.isock, self.osock, self.ipeeks); });
+        run(&mut self.osock, &mut self.isock, &self.opeeks);
+        // spawn(proc() { run(self.osock, self.isock, self.opeeks); });
+        // spawn(proc() { run(self.isock, self.osock, self.ipeeks); });
     }
 }
 
@@ -69,10 +73,10 @@ impl ProxyConfig {
         // TODO opeeks
 
         Proxy {
-            osock: osock,
-            isock: isock,
-            ipeeks: ipeeks,
-            opeeks: vec![],
+            osock: (osock),
+            isock: (isock),
+            ipeeks: (ipeeks),
+            opeeks: (vec![]),
         }
     }
 }
