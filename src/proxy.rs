@@ -40,7 +40,7 @@ impl Proxy {
             }
         }
 
-        run(&mut self.osock, &mut self.isock, &mut self.opeeks);
+        run(&mut self.isock, &mut self.osock, &mut self.ipeeks);
         // spawn(proc() { run(self.osock, self.isock, self.opeeks); });
         // spawn(proc() { run(self.isock, self.osock, self.ipeeks); });
     }
