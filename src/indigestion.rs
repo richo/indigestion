@@ -31,7 +31,7 @@ fn setup_proxy(opts: getopts::Matches) -> ProxyConfig {
     let endpoint = parse_target(opts.opt_str("t").unwrap());
     println!("{}", endpoint);
     let config = ProxyConfig::new(parse_target(opts.opt_str("t").unwrap()),
-                                  ("localhost".to_string(), opt_to_port(opts.opt_str("l").unwrap().as_slice())));
+                                  ("127.0.0.1".to_string(), opt_to_port(opts.opt_str("l").unwrap().as_slice())));
 
     println!("{}", config);
 
