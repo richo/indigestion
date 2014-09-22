@@ -23,12 +23,16 @@ pub struct Proxy {
 
 impl Proxy {
 
-    pub fn run(&mut self) {
-        fn run<R: Reader, W:Writer>(from: &mut R, to: &mut W, taps: &mut Vec<W>) -> ! {
+    pub fn run(self) {
+        type Data = [u8, ..1024];
+
+        fn run<R: Reader, W:Writer>(mut from: R, mut to: W, mut taps: Vec<W>) {
             debug!("Entering runloop");
             loop {
                 let mut buf = [0, ..1024];
-                from.read(buf);
+                if from.read(buf).unwrap() == 0 {
+                    return;
+                }
                 // XXX hack
                 let s = str::from_utf8(buf);
                 debug!("< {}", s);
@@ -40,7 +44,9 @@ impl Proxy {
             }
         }
 
-        run(&mut self.isock, &mut self.osock, &mut self.ipeeks);
+        let (isock, osock, ipeeks, opeeks) =
+            (self.isock, self.osock, self.ipeeks, self.opeeks);
+        spawn(proc() {run(isock, osock, ipeeks); })
         // spawn(proc() { run(self.osock, self.isock, self.opeeks); });
         // spawn(proc() { run(self.isock, self.osock, self.ipeeks); });
     }
