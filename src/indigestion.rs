@@ -30,8 +30,15 @@ fn parse_target(target: String) -> Endpoint {
 fn setup_proxy(opts: getopts::Matches) -> ProxyConfig {
     let endpoint = parse_target(opts.opt_str("t").unwrap());
     println!("{}", endpoint);
-    let config = ProxyConfig::new(parse_target(opts.opt_str("t").unwrap()),
+    let mut config = ProxyConfig::new(parse_target(opts.opt_str("t").unwrap()),
                                   ("127.0.0.1".to_string(), opt_to_port(opts.opt_str("l").unwrap().as_slice())));
+
+    for e in opts.opt_strs("ipeek").iter() {
+        config.add_ipeek(parse_target(e.clone()));
+    }
+    for e in opts.opt_strs("opeek").iter() {
+        config.add_opeek(parse_target(e.clone()));
+    }
 
     println!("{}", config);
 
