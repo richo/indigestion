@@ -25,7 +25,7 @@ impl Proxy {
     pub fn run(&mut self) {
         fn run<R: Reader, W:Writer>(from: &mut R, to: &mut W, taps: &mut Vec<W>) -> ! {
             loop {
-                let mut buf = [0];
+                let mut buf = [0, ..1024];
                 from.read(buf);
                 for tap in taps.mut_iter() {
                     (tap).write(buf).ok();
