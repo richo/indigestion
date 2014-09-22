@@ -23,18 +23,18 @@ pub struct Proxy {
 impl Proxy {
 
     pub fn run(&mut self) {
-        fn run<R: Reader, W:Writer>(from: &mut R, to: &mut W, mut taps: &Vec<W>) -> ! {
+        fn run<R: Reader, W:Writer>(from: &mut R, to: &mut W, taps: &mut Vec<W>) -> ! {
             loop {
                 let mut buf = [0];
                 from.read(buf);
-                // for mut tap in taps.iter() {
-                //     (tap).write(buf).ok();
-                // }
+                for tap in taps.mut_iter() {
+                    (tap).write(buf).ok();
+                }
                 to.write(buf).ok();
             }
         }
 
-        run(&mut self.osock, &mut self.isock, &self.opeeks);
+        run(&mut self.osock, &mut self.isock, &mut self.opeeks);
         // spawn(proc() { run(self.osock, self.isock, self.opeeks); });
         // spawn(proc() { run(self.isock, self.osock, self.ipeeks); });
     }
