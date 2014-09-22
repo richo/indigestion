@@ -1,7 +1,7 @@
 extern crate indigestion;
 extern crate getopts;
 
-use indigestion::proxy::ProxyConfig;
+use indigestion::proxy::{ProxyConfig,Endpoint};
 use getopts::{optopt,getopts,optmulti,optflag,OptGroup};
 use std::os;
 
@@ -12,10 +12,26 @@ fn usage(opts: &[OptGroup], error: bool) {
     }
 }
 
+fn opt_to_port(o: &str) -> u16 {
+    from_str::<u16>(o.as_slice()).unwrap()
+}
+
+
+fn parse_target(target: String) -> Endpoint {
+    let parts: Vec<&str> = target.as_slice().split(':').collect();
+    return match parts.len() {
+        0 => unreachable!(),
+        1 => ("localhost".to_string(), opt_to_port(parts[0])),
+        2 => (from_str(parts[0]).unwrap(), opt_to_port(parts[1])),
+        _ => fail!("Failed to parse: {}", target),
+    }
+}
 
 fn setup_proxy(opts: getopts::Matches) -> ProxyConfig {
-    let config = ProxyConfig::new(("localhost".to_string(), 3000),
-                                  ("localhost".to_string(), from_str::<u16>(opts.opt_str("l").unwrap().as_slice()).unwrap()));
+    let endpoint = parse_target(opts.opt_str("t").unwrap());
+    println!("{}", endpoint);
+    let config = ProxyConfig::new(parse_target(opts.opt_str("t").unwrap()),
+                                  ("localhost".to_string(), opt_to_port(opts.opt_str("l").unwrap().as_slice())));
 
     println!("{}", config);
 

@@ -1,8 +1,9 @@
 use std::sync::Arc;
-use std::io::TcpStream;
+use std::io::{Listener,Acceptor};
+use std::io::{TcpListener,TcpStream};
 use std::comm::channel;
 
-type Endpoint = (String, u16);
+pub type Endpoint = (String, u16);
 
 #[deriving(Show)]
 pub struct ProxyConfig {
@@ -59,11 +60,16 @@ impl ProxyConfig {
 
     pub fn connect(&self) -> Proxy {
         let osock = match self.osock {
-            (ref host, port) => TcpStream::connect(host.as_slice(), port).unwrap()
+            (ref host, port) => TcpStream::connect(host.as_slice(), port).ok()
+                .expect(format!("Couldn't connect to {}:{}", host, port).as_slice())
         };
 
         let isock = match self.isock {
-            (ref host, port) => TcpStream::connect(host.as_slice(), port).unwrap()
+            (ref host, port) => {
+                let listener = TcpListener::bind(host.as_slice(), port).ok()
+                    .expect(format!("Couldn't bind to {}:{}", host, port).as_slice());
+                listener.listen().accept().ok().expect("Couldn't accept connection")
+            }
         };
 
         let ipeeks = self.ipeeks.iter().map(|e: &Endpoint| -> TcpStream {
