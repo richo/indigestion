@@ -12,3 +12,8 @@ $(libindigestion): Makefile $(wildcard src/*.rs)
 	mkdir -p build
 	$(RUSTC) $(RUST_FLAGS) src/lib.rs --out-dir=build
 	@touch $@
+
+clean:
+	rm -f indigestion
+	rm -rf build
+.PHONY: clean
