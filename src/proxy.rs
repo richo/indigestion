@@ -30,8 +30,12 @@ impl Proxy {
             debug!("Entering runloop");
             loop {
                 let mut buf = [0, ..1024];
-                if from.read(buf).unwrap() == 0 {
-                    return;
+                match from.read(buf) {
+                    Err(_) => {
+                        println!("Input socket closed");
+                        return;
+                    }
+                    _ => { /* Everything is probably ok!" */ }
                 }
                 // XXX hack
                 let s = str::from_utf8(buf);
