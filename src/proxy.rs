@@ -2,6 +2,7 @@ use std::sync::Arc;
 use std::io::{Listener,Acceptor};
 use std::io::{TcpListener,TcpStream};
 use std::comm::channel;
+use std::str;
 
 pub type Endpoint = (String, u16);
 
@@ -24,9 +25,14 @@ impl Proxy {
 
     pub fn run(&mut self) {
         fn run<R: Reader, W:Writer>(from: &mut R, to: &mut W, taps: &mut Vec<W>) -> ! {
+            debug!("Entering runloop");
             loop {
                 let mut buf = [0, ..1024];
                 from.read(buf);
+                // XXX hack
+                let s = str::from_utf8(buf);
+                debug!("< {}", s);
+                // /XXX
                 for tap in taps.mut_iter() {
                     (tap).write(buf).ok();
                 }
